@@ -258,73 +258,53 @@ downloadBtn.addEventListener('click', () => {
     link.click();
 });
 
-// 5. Gestion de la galerie (Sauvegarde synchronisée avec $_POST de PHP)
+// 5. Gestion de la galerie (Sauvegarde locale dans le navigateur)
 saveGalleryBtn.addEventListener('click', () => {
     const dataURL = canvas.toDataURL('image/jpeg');
     
-    const params = new URLSearchParams();
-    params.append('image', dataURL);
-
-    fetch('save_meme.php', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: params
-    })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error('Erreur réseau lors de la communication avec le serveur.');
-        }
-        return response.json();
-    })
-    .then(data => {
-        if (data.success) {
-            const emptyMsg = gallery.querySelector('.empty-msg');
-            if (emptyMsg) emptyMsg.remove();
-
-            const galleryItem = document.createElement('div');
-            galleryItem.classList.add('gallery-item');
-            
-            const img = document.createElement('img');
-            img.src = data.filePath;
-            
-            galleryItem.appendChild(img);
-            gallery.prepend(galleryItem);
-            
-            alert('Mème enregistré avec succès en base de données !');
-        } else {
-            alert('Erreur serveur : ' + data.message);
-        }
-    })
-    .catch(error => {
-        console.error('Erreur:', error);
-        alert('Impossible de sauvegarder le mème. Vérifie XAMPP et la configuration de la BDD.');
-    });
+    // Récupérer les mèmes déjà sauvegardés ou créer un tableau vide
+    let savedMemes = JSON.parse(localStorage.getItem('myMemes')) || [];
+    
+    // Ajouter le nouveau mème au début du tableau
+    savedMemes.unshift(dataURL);
+    
+    // Sauvegarder le tableau mis à jour dans le LocalStorage
+    localStorage.setItem('myMemes', JSON.stringify(savedMemes));
+    
+    // Mettre à jour l'affichage de la galerie immédiatement
+    renderGallery(savedMemes);
+    
+    alert('Mème sauvegardé avec succès dans votre galerie locale !');
 });
 
-// 6. Chargement initial de la galerie depuis la table MySQL
-function loadGalleryFromDatabase() {
-    fetch('get_memes.php')
-    .then(response => response.json())
-    .then(data => {
-        if (data.success && data.memes.length > 0) {
-            const emptyMsg = gallery.querySelector('.empty-msg');
-            if (emptyMsg) emptyMsg.remove();
+// 6. Fonction pour afficher les mèmes dans la galerie HTML
+function renderGallery(memesList) {
+    // Vider la galerie actuelle pour éviter les doublons
+    gallery.innerHTML = '';
 
-            data.memes.forEach(meme => {
-                const galleryItem = document.createElement('div');
-                galleryItem.classList.add('gallery-item');
-                
-                const img = document.createElement('img');
-                img.src = meme.file_path;
-                
-                galleryItem.appendChild(img);
-                gallery.appendChild(galleryItem);
-            });
-        }
-    })
-    .catch(error => console.error('Erreur lors du chargement de la galerie :', error));
+    if (memesList.length === 0) {
+        gallery.innerHTML = '<p class="empty-msg">Aucun mème créé pour le moment. Lancez-vous !</p>';
+        return;
+    }
+
+    // Boucler sur chaque mème pour créer les éléments HTML
+    memesList.forEach(memeSrc => {
+        const galleryItem = document.createElement('div');
+        galleryItem.classList.add('gallery-item');
+        
+        const img = document.createElement('img');
+        img.src = memeSrc;
+        
+        galleryItem.appendChild(img);
+        gallery.appendChild(galleryItem);
+    });
 }
 
+// Fonction de chargement initial au démarrage de la page
+function loadGalleryFromLocalStorage() {
+    const savedMemes = JSON.parse(localStorage.getItem('myMemes')) || [];
+    renderGallery(savedMemes);
+}
 // 7. Partage sur les réseaux sociaux (Web Share API)
 shareBtn.addEventListener('click', () => {
     canvas.toBlob((blob) => {
@@ -386,5 +366,5 @@ document.addEventListener('keydown', (e) => {
     }
 });
 
-// Exécuter le chargement de l'historique BDD au chargement de la page
-document.addEventListener('DOMContentLoaded', loadGalleryFromDatabase);
+// Remplacer l'ancien appel de loadGalleryFromDatabase
+document.addEventListener('DOMContentLoaded', loadGalleryFromLocalStorage);
