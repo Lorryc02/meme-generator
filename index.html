@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meme Generator</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header>
+        <h1><i class="fa-solid fa-bolt"></i> Meme Maker Studio</h1>
+    </header>
+
+    <main class="container">
+        <section class="editor-section">
+            <div class="canvas-container">
+                <canvas id="memeCanvas" width="500" height="500"></canvas>
+            </div>
+
+            <div class="controls">
+                <div class="control-group">
+                    <label for="imageLoader"><i class="fa-solid fa-folder-open"></i> Choisir une image</label>
+                    <input type="file" id="imageLoader" accept="image/*">
+                </div>
+
+                <div class="control-group">
+                    <label for="topText">Texte du haut</label>
+                    <input type="text" id="topText" placeholder="Entrez le texte du haut" disabled>
+                </div>
+
+                <div class="control-group">
+                    <label for="bottomText">Texte du bas</label>
+                    <input type="text" id="bottomText" placeholder="Entrez le texte du bas" disabled>
+                </div>
+
+                <div class="custom-options">
+                    <div class="control-group inline">
+                        <label for="textColor"><i class="fa-solid fa-palette"></i> Texte :</label>
+                        <input type="color" id="textColor" value="#ffffff" disabled>
+                        
+                        <label for="strokeColor"><i class="fa-solid fa-circle-half-stroke"></i> Contour :</label>
+                        <input type="color" id="strokeColor" value="#000000" disabled>
+                    </div>
+
+                    <div class="control-group">
+                        <label for="fontFamily"><i class="fa-solid fa-font"></i> Police d'écriture</label>
+                        <select id="fontFamily" disabled>
+                            <option value="Impact">Impact (Classique)</option>
+                            <option value="Arial">Arial</option>
+                            <option value="Comic Sans MS">Comic Sans MS</option>
+                            <option value="Courier New">Courier New</option>
+                        </select>
+                    </div>
+
+                    <div class="control-group">
+                        <label for="textSize"><i class="fa-solid fa-text-height"></i> Taille de la police (<span id="sizeVal">40</span>px)</label>
+                        <input type="range" id="textSize" min="10" max="100" value="40" disabled>
+                    </div>
+
+                    <div class="control-group">
+                        <label for="textAlignment"><i class="fa-solid fa-align-left"></i> Alignement du texte</label>
+                        <select id="textAlignment" disabled>
+                            <option value="center">Centré</option>
+                            <option value="left">Gauche</option>
+                            <option value="right">Droite</option>
+                        </select>
+                    </div>
+
+                    <div class="control-group">
+                        <label><i class="fa-solid fa-wand-magic-sparkles"></i> Filtres d'image</label>
+                        <div class="filter-buttons">
+                            <button type="button" class="btn-filter" data-filter="none" disabled>Normal</button>
+                            <button type="button" class="btn-filter" data-filter="grayscale(100%)" disabled>N&B</button>
+                            <button type="button" class="btn-filter" data-filter="sepia(100%)" disabled>Sépia</button>
+                            <button type="button" class="btn-filter" data-filter="invert(100%)" disabled>Inverser</button>
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <label><i class="fa-solid fa-face-smile"></i> Ajouter des éléments</label>
+                        <div class="sticker-buttons">
+                            <button type="button" class="btn-sticker" data-sticker="😎" disabled>😎 Lunettes</button>
+                            <button type="button" class="btn-sticker" data-sticker="💥" disabled>💥 Boom</button>
+                            <button type="button" class="btn-sticker" data-sticker="👑" disabled>👑 Couronne</button>
+                            <button type="button" class="btn-sticker" data-sticker="🔥" disabled>🔥 Feu</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="control-group">
+                  <button type="button" id="deleteElementBtn" class="btn btn-danger" disabled>
+                    <i class="fa-solid fa-trash-can"></i> Supprimer l'élément sélectionné
+                 </button>
+                </div>
+
+                <div class="actions">
+                    <button id="downloadBtn" class="btn btn-primary" disabled><i class="fa-solid fa-download"></i> Télécharger</button>
+                    <button id="shareBtn" class="btn btn-info" disabled><i class="fa-solid fa-share-nodes"></i> Partager</button>
+                    <button id="saveGalleryBtn" class="btn btn-success" disabled><i class="fa-solid fa-floppy-disk"></i> Sauvegarder</button>
+                </div>
+            </div>
+        </section>
+
+        <hr>
+
+        <section class="gallery-section">
+            <h2><i class="fa-solid fa-images"></i> Galerie des créations</h2>
+            <div id="gallery" class="gallery-grid">
+                <p class="empty-msg">Aucun mème créé pour le moment. Lancez-vous !</p>
+            </div>
+        </section>
+    </main>
+
+    <script src="app.js"></script>
+</body>
+</html>

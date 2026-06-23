@@ -1,0 +1,329 @@
+:root {
+    --primary: #6c5ce7;
+    --success: #00b894;
+    --danger: #ff7675;
+    --danger-hover: #d63031;
+    --dark: #2d3436;
+    --light: #dfe6e9;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f9f9f9;
+    color: var(--dark);
+    margin: 0;
+    padding: 0;
+}
+
+header {
+    background-color: var(--dark);
+    color: white;
+    text-align: center;
+    padding: 1rem;
+}
+
+/* Espace entre les icônes Font Awesome et le texte */
+.controls i, header i, h2 i, .actions i {
+    margin-right: 8px;
+}
+
+.container {
+    max-width: 1000px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+    box-sizing: border-box;
+}
+
+/* Section Éditeur fluide */
+.editor-section {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2rem;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+/* Conteneur du Canvas adaptatif */
+.canvas-container {
+    flex: 1;
+    min-width: 300px;
+    max-width: 500px; /* Limite la taille sur très grand écran */
+    background: #e0e0e0;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+canvas {
+    display: block;
+    width: 100%;
+    height: auto;
+    background-color: #ccc;
+    cursor: move;
+}
+
+/* Panneau de contrôles */
+.controls {
+    flex: 1.2;
+    min-width: 300px;
+    background: white;
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    box-sizing: border-box;
+}
+
+.control-group {
+    margin-bottom: 1.2rem;
+}
+
+.control-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+}
+
+input[type="text"], select {
+    width: 100%;
+    padding: 0.8rem;
+    border: 2px solid var(--light);
+    border-radius: 4px;
+    box-sizing: border-box;
+    font-size: 1rem;
+    background: white;
+}
+
+input[type="text"]:focus, select:focus {
+    border-color: var(--primary);
+    outline: none;
+}
+
+input[type="text"]:disabled, select:disabled, input[type="range"]:disabled {
+    opacity: 0.6;
+    background-color: #f5f6fa;
+    cursor: not-allowed;
+}
+
+input[type="file"] {
+    display: none;
+}
+
+label[for="imageLoader"] {
+    display: block;
+    background-color: var(--primary);
+    color: white;
+    padding: 0.8rem;
+    text-align: center;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+label[for="imageLoader"]:hover {
+    background-color: #5b4cc4;
+}
+
+/* Options de personnalisation */
+.custom-options {
+    background: #f1f2f6;
+    padding: 1.2rem;
+    border-radius: 6px;
+    margin-bottom: 1.2rem;
+    border: 1px solid var(--light);
+}
+
+.inline {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.inline label {
+    margin-bottom: 0;
+}
+
+.inline input[type="color"] {
+    border: 2px solid var(--light);
+    border-radius: 4px;
+    width: 45px;
+    height: 35px;
+    cursor: pointer;
+    background: none;
+    padding: 0;
+}
+
+.inline input[type="color"]:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+input[type="range"] {
+    width: 100%;
+    margin-top: 0.5rem;
+    cursor: pointer;
+}
+
+/* Boutons de Filtres et Stickers */
+.filter-buttons, .sticker-buttons {
+    display: flex;
+    gap: 6px;
+    margin-top: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.btn-filter, .btn-sticker {
+    flex: 1;
+    min-width: 75px;
+    padding: 8px;
+    background: #ffffff;
+    border: 2px solid var(--light);
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.btn-filter:hover:not(:disabled), .btn-sticker:hover:not(:disabled) {
+    border-color: var(--primary);
+    background: #f8f9fa;
+}
+
+.btn-filter:disabled, .btn-sticker:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background: #f5f6fa;
+}
+
+.btn-filter.active {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+}
+
+/* Zone des Actions de fin (Boutons de téléchargement/partage/sauvegarde) */
+.actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.btn {
+    flex: 1;
+    min-width: 130px;
+    padding: 0.8rem;
+    border: none;
+    border-radius: 4px;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: opacity 0.2s;
+    text-align: center;
+}
+
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.btn-primary { background-color: var(--primary); color: white; }
+.btn-success { background-color: var(--success); color: white; }
+.btn-info { background-color: #0abde3; color: white; }
+
+/* Bouton de Suppression */
+.btn-danger {
+    background-color: var(--danger);
+    color: white;
+    width: 100%;
+    border: none;
+    padding: 0.8rem;
+    border-radius: 4px;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background 0.2s;
+}
+.btn-danger:hover:not(:disabled) {
+    background-color: var(--danger-hover);
+}
+
+hr {
+    margin: 3rem 0;
+    border: 0;
+    border-top: 2px solid var(--light);
+}
+
+/* Galerie Responsive Grid */
+.gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+}
+
+.gallery-item {
+    border-radius: 6px;
+    overflow: hidden;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    background: white;
+    transition: transform 0.2s;
+}
+
+.gallery-item:hover {
+    transform: scale(1.02);
+}
+
+.gallery-item img {
+    width: 100%;
+    display: block;
+    height: auto;
+}
+
+.empty-msg {
+    grid-column: 1 / -1;
+    text-align: center;
+    color: #7f8c8d;
+    font-style: italic;
+}
+
+/* 📱 COMPATIBILITÉ MÉDIAS ET RESPONSIVE */
+
+/* Pour tablettes et mobiles */
+@media (max-width: 768px) {
+    .container {
+        margin: 1rem auto;
+    }
+    
+    .editor-section {
+        flex-direction: column; /* Aligne le canvas au-dessus des contrôles */
+        align-items: center;
+        gap: 1.5rem;
+    }
+
+    .canvas-container, .controls {
+        width: 100%; /* S'adapte à toute la largeur de l'appareil */
+        max-width: 100%;
+    }
+
+    .actions {
+        flex-direction: column; /* Aligne les gros boutons verticalement sur mobile */
+        gap: 0.8rem;
+    }
+    
+    .btn {
+        width: 100%;
+    }
+}
+
+/* Pour les téléphones portables étroits */
+@media (max-width: 480px) {
+    .controls {
+        padding: 1rem;
+    }
+    
+    .btn-filter, .btn-sticker {
+        font-size: 0.8rem;
+        padding: 6px;
+    }
+}
