@@ -7,7 +7,7 @@ const bottomTextInput = document.getElementById('bottomText');
 const downloadBtn = document.getElementById('downloadBtn');
 const shareBtn = document.getElementById('shareBtn'); 
 const saveGalleryBtn = document.getElementById('saveGalleryBtn');
-const deleteElementBtn = document.getElementById('deleteElementBtn'); // 🆕 Bouton supprimer
+const deleteElementBtn = document.getElementById('deleteElementBtn');
 const gallery = document.getElementById('gallery');
 
 // 🛠️ Éléments de contrôle et de personnalisation
@@ -26,7 +26,7 @@ let currentFilter = 'none';
 // Configuration des états des objets déplaçables (Drag Text & Stickers)
 let textTop = { text: '', x: 250, y: 50, width: 0, height: 40 };
 let textBottom = { text: '', x: 250, y: 450, width: 0, height: 40 };
-let stickers = []; // Contiendra les éléments sous la forme : { type: '😎', x: 250, y: 250, size: 60 }
+let stickers = []; 
 
 let selectedElement = null; // Cible actuelle ('top', 'bottom', ou { type: 'sticker', index: i })
 let isDragging = false;
@@ -41,7 +41,7 @@ function handleImage(e) {
         img.onload = function() {
             activeImage = img;
             
-            // Adapter la taille du canvas à l'image
+            // Adapter la taille logique du canvas à l'image
             canvas.width = img.width;
             canvas.height = img.height;
             
@@ -80,7 +80,7 @@ function handleImage(e) {
     }
 }
 
-// 2. Moteur de rendu en temps réel (Image, Filtres, Textes, Stickers et Focus)
+// 2. Moteur de rendu en temps réel
 function updateMeme() {
     if (!activeImage) return;
 
@@ -88,7 +88,7 @@ function updateMeme() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.filter = currentFilter;
     ctx.drawImage(activeImage, 0, 0, canvas.width, canvas.height);
-    ctx.filter = 'none'; // Désactiver le filtre pour ne pas impacter les textes et émojis
+    ctx.filter = 'none'; 
 
     // Étape B : Configuration des styles de texte
     const fontSize = textSizeInput.value;
@@ -127,11 +127,11 @@ function updateMeme() {
         ctx.fillText(sticker.type, sticker.x, sticker.y);
     });
 
-    // 🆕 Étape D : Dessiner un contour de sélection autour de l'élément actif
+    // Étape D : Dessiner un contour de sélection autour de l'élément actif
     if (selectedElement) {
-        ctx.strokeStyle = '#6c5ce7'; // Couleur principale violette
+        ctx.strokeStyle = '#6c5ce7'; 
         ctx.lineWidth = 2;
-        ctx.setLineDash([6, 4]); // Lignes en pointillés
+        ctx.setLineDash([6, 4]); 
 
         if (selectedElement === 'top' && textTop.text) {
             ctx.strokeRect(textTop.x - textTop.width / 2 - 10, textTop.y - textTop.height / 2 - 5, textTop.width + 20, textTop.height + 10);
@@ -143,22 +143,41 @@ function updateMeme() {
                 ctx.strokeRect(s.x - s.size / 2 - 5, s.y - s.size / 2 - 5, s.size + 10, s.size + 10);
             }
         }
-        ctx.setLineDash([]); // Réinitialisation
+        ctx.setLineDash([]); 
     }
 }
 
-// 3. Logique d'interaction et de déplacement à la souris (Drag & Drop)
-canvas.addEventListener('mousedown', (e) => {
-    if (!activeImage) return;
+// 📱 2.5 Fonction Responsive : Conversion des coordonnées Écran -> Canvas
+function getCoordinates(e) {
     const rect = canvas.getBoundingClientRect();
-    
-    const mouseX = (e.clientX - rect.left) * (canvas.width / rect.width);
-    const mouseY = (e.clientY - rect.top) * (canvas.height / rect.height);
+    let clientX, clientY;
+
+    if (e.touches && e.touches.length > 0) {
+        clientX = e.touches[0].clientX;
+        clientY = e.touches[0].clientY;
+    } else { 
+        clientX = e.clientX;
+        clientY = e.clientY;
+    }
+
+    return {
+        x: (clientX - rect.left) * (canvas.width / rect.width),
+        y: (clientY - rect.top) * (canvas.height / rect.height)
+    };
+}
+
+// 3. Logique d'interaction et de déplacement (Souris + Tactile)
+function handleStart(e) {
+    if (!activeImage) return;
+    if (e.type === 'touchstart' && e.target === canvas) e.preventDefault();
+
+    const pos = getCoordinates(e);
+    const mouseX = pos.x;
+    const mouseY = pos.y;
 
     selectedElement = null;
     if (deleteElementBtn) deleteElementBtn.disabled = true;
 
-    // Détection des clics sur les stickers (priorité au premier plan)
     for (let i = stickers.length - 1; i >= 0; i--) {
         const s = stickers[i];
         if (Math.abs(mouseX - s.x) < s.size / 2 && Math.abs(mouseY - s.y) < s.size / 2) {
@@ -170,7 +189,6 @@ canvas.addEventListener('mousedown', (e) => {
         }
     }
 
-    // Détection du clic sur le texte du haut
     if (textTop.text && mouseX > textTop.x - textTop.width / 2 && mouseX < textTop.x + textTop.width / 2 &&
         mouseY > textTop.y - textTop.height / 2 && mouseY < textTop.y + textTop.height / 2) {
         selectedElement = 'top';
@@ -180,7 +198,6 @@ canvas.addEventListener('mousedown', (e) => {
         return;
     }
 
-    // Détection du clic sur le texte du bas
     if (textBottom.text && mouseX > textBottom.x - textBottom.width / 2 && mouseX < textBottom.x + textBottom.width / 2 &&
         mouseY > textBottom.y - textBottom.height / 2 && mouseY < textBottom.y + textBottom.height / 2) {
         selectedElement = 'bottom';
@@ -190,14 +207,16 @@ canvas.addEventListener('mousedown', (e) => {
         return;
     }
 
-    updateMeme(); // Permet d'effacer le cadre si on clique sur le fond vide
-});
+    updateMeme(); 
+}
 
-canvas.addEventListener('mousemove', (e) => {
+function handleMove(e) {
     if (!isDragging || !selectedElement) return;
-    const rect = canvas.getBoundingClientRect();
-    const mouseX = (e.clientX - rect.left) * (canvas.width / rect.width);
-    const mouseY = (e.clientY - rect.top) * (canvas.height / rect.height);
+    if (e.cancelable) e.preventDefault();
+
+    const pos = getCoordinates(e);
+    const mouseX = pos.x;
+    const mouseY = pos.y;
 
     if (selectedElement === 'top') {
         textTop.x = mouseX; textTop.y = mouseY;
@@ -208,12 +227,19 @@ canvas.addEventListener('mousemove', (e) => {
         stickers[selectedElement.index].y = mouseY;
     }
     updateMeme();
-});
+}
 
-// Mise à jour : on garde l'élément sélectionné au relâchement pour pouvoir le supprimer
 const stopDragging = () => { isDragging = false; };
+
+canvas.addEventListener('mousedown', handleStart);
+canvas.addEventListener('mousemove', handleMove);
 canvas.addEventListener('mouseup', stopDragging);
 canvas.addEventListener('mouseleave', stopDragging);
+
+canvas.addEventListener('touchstart', handleStart, { passive: false });
+canvas.addEventListener('touchmove', handleMove, { passive: false });
+canvas.addEventListener('touchend', stopDragging);
+canvas.addEventListener('touchcancel', stopDragging);
 
 // ⚡ Écouteurs d'événements pour appliquer les styles en direct
 topTextInput.addEventListener('input', updateMeme);
@@ -242,7 +268,6 @@ stickerButtons.forEach(button => {
             y: canvas.height / 2,
             size: Math.floor(canvas.width * 0.12)
         });
-        // Sélectionne automatiquement le nouveau sticker ajouté
         selectedElement = { type: 'sticker', index: stickers.length - 1 };
         if (deleteElementBtn) deleteElementBtn.disabled = false;
         updateMeme();
@@ -258,28 +283,37 @@ downloadBtn.addEventListener('click', () => {
     link.click();
 });
 
-// 5. Gestion de la galerie (Sauvegarde locale dans le navigateur)
+// 5. Gestion de la galerie (Sauvegarde locale enrichie pour édition/suppression)
 saveGalleryBtn.addEventListener('click', () => {
-    const dataURL = canvas.toDataURL('image/jpeg');
+    if (!activeImage) return;
+
+    const finalImageURL = canvas.toDataURL('image/jpeg');
     
-    // Récupérer les mèmes déjà sauvegardés ou créer un tableau vide
+    const newMeme = {
+        id: Date.now(), 
+        thumbnail: finalImageURL,
+        textTop: { ...textTop },
+        textBottom: { ...textBottom },
+        stickers: JSON.parse(JSON.stringify(stickers)), 
+        currentFilter: currentFilter,
+        textSize: textSizeInput.value,
+        textColor: textColorInput.value,
+        strokeColor: strokeColorInput.value,
+        fontFamily: fontFamilyInput.value,
+        textAlignment: textAlignmentInput.value,
+        bgSrc: activeImage.src 
+    };
+
     let savedMemes = JSON.parse(localStorage.getItem('myMemes')) || [];
-    
-    // Ajouter le nouveau mème au début du tableau
-    savedMemes.unshift(dataURL);
-    
-    // Sauvegarder le tableau mis à jour dans le LocalStorage
+    savedMemes.unshift(newMeme);
     localStorage.setItem('myMemes', JSON.stringify(savedMemes));
     
-    // Mettre à jour l'affichage de la galerie immédiatement
     renderGallery(savedMemes);
-    
-    alert('Mème sauvegardé avec succès dans votre galerie locale !');
+    alert('Mème sauvegardé dans la galerie !');
 });
 
-// 6. Fonction pour afficher les mèmes dans la galerie HTML
+// 6. Fonction pour afficher les mèmes avec boutons Éditer et Supprimer
 function renderGallery(memesList) {
-    // Vider la galerie actuelle pour éviter les doublons
     gallery.innerHTML = '';
 
     if (memesList.length === 0) {
@@ -287,24 +321,109 @@ function renderGallery(memesList) {
         return;
     }
 
-    // Boucler sur chaque mème pour créer les éléments HTML
-    memesList.forEach(memeSrc => {
+    memesList.forEach(meme => {
         const galleryItem = document.createElement('div');
         galleryItem.classList.add('gallery-item');
+        galleryItem.style.position = 'relative';
         
         const img = document.createElement('img');
-        img.src = memeSrc;
+        img.src = meme.thumbnail;
+        
+        const actionOverlay = document.createElement('div');
+        actionOverlay.className = 'gallery-actions';
+        actionOverlay.style.display = 'flex';
+        actionOverlay.style.gap = '5px';
+        actionOverlay.style.padding = '8px';
+        actionOverlay.style.background = '#f1f2f6';
+
+        const editBtn = document.createElement('button');
+        editBtn.innerHTML = 'Éditer';
+        editBtn.className = 'btn-filter active'; 
+        editBtn.style.fontSize = '0.75rem';
+        editBtn.style.padding = '5px 10px';
+        editBtn.addEventListener('click', () => loadMemeToEditor(meme));
+
+        const deleteBtn = document.createElement('button');
+        deleteBtn.innerHTML = 'Supprimer';
+        deleteBtn.className = 'btn-filter';
+        deleteBtn.style.fontSize = '0.75rem';
+        deleteBtn.style.padding = '5px 10px';
+        deleteBtn.style.backgroundColor = '#ff7675';
+        deleteBtn.style.color = 'white';
+        deleteBtn.addEventListener('click', () => deleteMemeFromGallery(meme.id));
+
+        actionOverlay.appendChild(editBtn);
+        actionOverlay.appendChild(deleteBtn);
         
         galleryItem.appendChild(img);
+        galleryItem.appendChild(actionOverlay);
         gallery.appendChild(galleryItem);
     });
 }
 
-// Fonction de chargement initial au démarrage de la page
+// 6.5 Logique de réédition et de suppression
+function loadMemeToEditor(meme) {
+    const img = new Image();
+    img.onload = function() {
+        activeImage = img;
+        canvas.width = img.width;
+        canvas.height = img.height;
+
+        topTextInput.disabled = false;
+        bottomTextInput.disabled = false;
+        textColorInput.disabled = false;
+        strokeColorInput.disabled = false;
+        textSizeInput.disabled = false;
+        textAlignmentInput.disabled = false;
+        fontFamilyInput.disabled = false;
+        downloadBtn.disabled = false;
+        shareBtn.disabled = false; 
+        saveGalleryBtn.disabled = false;
+        filterButtons.forEach(btn => btn.disabled = false);
+        stickerButtons.forEach(btn => btn.disabled = false);
+
+        topTextInput.value = meme.textTop.text;
+        bottomTextInput.value = meme.textBottom.text;
+        textSizeInput.value = meme.textSize;
+        textColorInput.value = meme.textColor;
+        strokeColorInput.value = meme.strokeColor;
+        fontFamilyInput.value = meme.fontFamily;
+        textAlignmentInput.value = meme.textAlignment;
+        currentFilter = meme.currentFilter;
+
+        filterButtons.forEach(btn => {
+            if(btn.getAttribute('data-filter') === currentFilter) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+        });
+
+        textTop = { ...meme.textTop };
+        textBottom = { ...meme.textBottom };
+        stickers = JSON.parse(JSON.stringify(meme.stickers));
+        selectedElement = null;
+
+        updateMeme();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+    img.src = meme.bgSrc;
+}
+
+function deleteMemeFromGallery(memeId) {
+    if (confirm('Voulez-vous vraiment supprimer ce mème de votre galerie ?')) {
+        let savedMemes = JSON.parse(localStorage.getItem('myMemes')) || [];
+        savedMemes = savedMemes.filter(meme => meme.id !== memeId);
+        localStorage.setItem('myMemes', JSON.stringify(savedMemes));
+        renderGallery(savedMemes);
+    }
+}
+
 function loadGalleryFromLocalStorage() {
     const savedMemes = JSON.parse(localStorage.getItem('myMemes')) || [];
     renderGallery(savedMemes);
 }
+
 // 7. Partage sur les réseaux sociaux (Web Share API)
 shareBtn.addEventListener('click', () => {
     canvas.toBlob((blob) => {
@@ -322,17 +441,15 @@ shareBtn.addEventListener('click', () => {
                 text: 'Regarde le mème que je viens de générer !'
             })
             .catch((error) => {
-                if (error.name !== 'AbortError') {
-                    console.error('Erreur lors du partage :', error);
-                }
+                if (error.name !== 'AbortError') console.error('Erreur lors du partage :', error);
             });
         } else {
-            alert("Le partage de fichiers n'est pas pris en charge par ce navigateur. Télécharge ton mème pour le publier !");
+            alert("Le partage de fichiers n'est pas pris en charge par ce navigateur.");
         }
     }, 'image/jpeg');
 });
 
-// 🆕 8. Fonctionnalité de Suppression de l'élément sélectionné
+// 8. Fonctionnalité de Suppression de l'élément sélectionné au clavier/bouton
 function deleteCurrentElement() {
     if (!selectedElement) return;
 
@@ -351,20 +468,16 @@ function deleteCurrentElement() {
     updateMeme();
 }
 
-// Écouteur du clic sur le bouton rouge
 if (deleteElementBtn) {
     deleteElementBtn.addEventListener('click', deleteCurrentElement);
 }
 
-// Écouteur des touches "Delete" ou "Backspace" du clavier physique
 document.addEventListener('keydown', (e) => {
     if (e.key === 'Delete' || e.key === 'Backspace') {
-        // Ne supprime pas si l'utilisateur est en train de taper dans un des inputs textuels
         if (document.activeElement !== topTextInput && document.activeElement !== bottomTextInput) {
             deleteCurrentElement();
         }
     }
 });
 
-// Remplacer l'ancien appel de loadGalleryFromDatabase
 document.addEventListener('DOMContentLoaded', loadGalleryFromLocalStorage);
